@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import RegisterUserAPIView, LoginAPIView, ProtectedExampleView, UserView,LogoutAPIView,CategoryView
+from .views import RegisterUserAPIView, LoginAPIView, ProtectedExampleView, UserView,LogoutAPIView,CategoryView,ChangePasswordView
 
 urlpatterns = [
     path('register/', RegisterUserAPIView.as_view(), name='register'),
@@ -14,4 +14,5 @@ urlpatterns = [
     path('insertCategory/', CategoryView.as_view(), name='protected'),
     path('updateCategory/', CategoryView.as_view(), name='protected'),
     path('removeCategory/<int:pk>/', CategoryView.as_view(), name='protected-delete'),
+    path('change-password/', ChangePasswordView.as_view(), name='change-password'),
 ]

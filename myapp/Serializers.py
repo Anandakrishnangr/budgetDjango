@@ -54,3 +54,14 @@ class CategorySerializer(serializers.ModelSerializer):
         instance.TransactionDate = validated_data.get('TransactionDate', instance.TransactionDate)
         instance.save()
         return instance
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True)
+
+    def validate_new_password(self, value):
+        # Add any additional password validations here
+        if len(value) < 8:
+            raise serializers.ValidationError("Password must be at least 8 characters long.")
+        return value

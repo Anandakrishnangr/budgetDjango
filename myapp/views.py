@@ -7,7 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .Serializers import TransactionSerializer
-from .Serializers import CategorySerializer
+from .Serializers import CategorySerializer,ChangePasswordSerializer
 
 from rest_framework.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
@@ -136,3 +136,27 @@ class LogoutAPIView(APIView):
             return Response({"detail": "Successfully logged out."}, status=status.HTTP_200_OK)
         except Token.DoesNotExist:
             return Response({"detail": "Token not found."}, status=status.HTTP_400_BAD_REQUEST)
+        
+
+class ChangePasswordView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        serializer = ChangePasswordSerializer(data=request.data)
+        
+        if serializer.is_valid():
+            old_password = serializer.validated_data['old_password']
+            new_password = serializer.validated_data['new_password']
+            
+            # Check old password
+            if not user.check_password(old_password):
+                return Response({"old_password": ["Wrong password."]}, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Set the new password
+            user.set_password(new_password)
+            user.save()
+            
+            return Response({"detail": "Password updated successfully."}, status=status.HTTP_200_OK)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
