@@ -25,9 +25,8 @@ class RegisterUserAPIView(generics.GenericAPIView):
             return Response({
                 "user": UserSerializer(user, context=self.get_serializer_context()).data,
                 "token": token.key
-            })
+            }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 class LoginAPIView(generics.GenericAPIView):
     serializer_class = UserSerializer
 
