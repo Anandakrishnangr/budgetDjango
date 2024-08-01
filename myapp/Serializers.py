@@ -4,10 +4,13 @@ from .models import Transaction
 from .models import Category
 
 
+
 class UserSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)  # Add password as write-only field
+
     class Meta:
         model = User
-        fields = ['username', 'email', 'password']
+        fields = ['username', 'email', 'password']  # Include password here for validation
 
     def validate_email(self, value):
         if User.objects.filter(email=value).exists():
@@ -15,6 +18,7 @@ class UserSerializer(serializers.ModelSerializer):
         return value
 
     def create(self, validated_data):
+        # Create user with hashed password
         user = User.objects.create_user(
             username=validated_data['username'],
             email=validated_data['email'],

@@ -14,6 +14,7 @@ from django.shortcuts import get_object_or_404
 from .models import Transaction
 from .models import Category
 
+
 class RegisterUserAPIView(generics.GenericAPIView):
     serializer_class = UserSerializer
 
@@ -22,8 +23,10 @@ class RegisterUserAPIView(generics.GenericAPIView):
         if serializer.is_valid():
             user = serializer.save()
             token, created = Token.objects.get_or_create(user=user)
+            # Serialize user data without the password
+            user_data = UserSerializer(user, context=self.get_serializer_context()).data
             return Response({
-                "user": UserSerializer(user, context=self.get_serializer_context()).data,
+                "user": user_data,
                 "token": token.key
             }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
