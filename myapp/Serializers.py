@@ -25,27 +25,7 @@ class UserSerializer(serializers.ModelSerializer):
             password=validated_data['password']
         )
         return user
-class TransactionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Transaction
-        fields = '__all__'
-        read_only_fields = ('UserID',)
 
-
-    def create(self, validated_data):
-        validated_data['UserID'] = self.context['request'].user
-
-        return super().create(validated_data)
-    
-    def update(self, instance, validated_data):
-        instance.Amount = validated_data.get('Amount', instance.Amount)
-        instance.CategoryID = validated_data.get('CategoryID', instance.CategoryID)
-        instance.Description = validated_data.get('Description', instance.Description)
-        instance.TransactionDate = validated_data.get('TransactionDate', instance.TransactionDate)
-        instance.TransactionType = validated_data.get('TransactionType', instance.TransactionType)
-        instance.save()
-        return instance
-    
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -65,6 +45,34 @@ class CategorySerializer(serializers.ModelSerializer):
         instance.TransactionDate = validated_data.get('TransactionDate', instance.TransactionDate)
         instance.save()
         return instance
+
+class TransactionSerializer(serializers.ModelSerializer):
+    CategoryID = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all()) 
+
+
+    class Meta:
+        model = Transaction
+        fields = '__all__'
+        read_only_fields = ('UserID',)
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['CategoryID'] = CategorySerializer(instance.CategoryID).data
+        return representation
+    
+    def create(self, validated_data):
+        validated_data['UserID'] = self.context['request'].user
+        return super().create(validated_data)
+    
+    def update(self, instance, validated_data):
+        instance.Amount = validated_data.get('Amount', instance.Amount)
+        instance.CategoryID = validated_data.get('CategoryID', instance.CategoryID)
+        instance.Description = validated_data.get('Description', instance.Description)
+        instance.TransactionDate = validated_data.get('TransactionDate', instance.TransactionDate)
+        instance.TransactionType = validated_data.get('TransactionType', instance.TransactionType)
+        instance.save()
+        return instance
+    
 
 
 class ChangePasswordSerializer(serializers.Serializer):

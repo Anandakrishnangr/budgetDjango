@@ -47,13 +47,20 @@ class ProtectedExampleView(APIView):
     print('hel')
     def get(self, request, *args, **kwargs):
         user = request.user
-        transactions = Transaction.objects.filter(UserID=user)
+        transactions = Transaction.objects.filter(UserID=user).select_related('CategoryID')
         serializer = TransactionSerializer(transactions, many=True)
         return Response(serializer.data)
     
     def post(self, request, format=None):
-        serializer = TransactionSerializer(data=request.data, context={'request': request})
         print('data is coming')
+        print(request.data)
+        user = request.user
+        data = request.data
+        category_id = data.get('CategoryID')
+
+        # Ensure the Category exists and belongs to the user
+        category = get_object_or_404(Category, id=category_id, UserID=user)
+        serializer = TransactionSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
             print('data is com')
             serializer.save()
